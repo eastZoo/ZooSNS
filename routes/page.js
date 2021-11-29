@@ -23,6 +23,7 @@ router.get('/', (req, res, next) => {   //들어가자마자 메인 게시물들
   res.render('main', {
     title: 'NodeBird',
     twits,
+    user: req.user,   //user: req.user 추가
   });
 });
 
