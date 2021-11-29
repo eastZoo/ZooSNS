@@ -10,6 +10,7 @@ const passport = require('passport');
 dotenv.config();   //dotenv는 최대한 위로 올려주세요
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
+const postRouter = require('./routes/post');
 const { sequelize } = require('./models');
 const passportConfig= require('./passport');
 
@@ -33,7 +34,7 @@ passportConfig(); //passport폴더 실행
 
 app.use(morgan('dev'));    //6장 내용
 app.use(express.static(path.join(__dirname, 'public')));    //정적파일들 , CSS 등,,
-app.use('/img', express.static(path.join(__dirname, 'uploads')));
+app.use('/img', express.static(path.join(__dirname, 'uploads'))); //post.js 31:0
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  //이메일, 패스워드같은 것들을 req.body, req.password로 바꿔줌, enctype = multipart/form-data 인경우에 못바꿔줌( -> multer)
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -51,6 +52,7 @@ app.use(passport.session());  // 로그인되어 있으면 브라우저가 세�
 
 app.use('/', pageRouter);
 app.use('/auth', authRouter);
+app.use('/post', postRouter);
 
 app.use((req, res, next) => {   // 53-56 라우터에서 처리가 되지않으면 404에러가 나고 404에러 처리 미들웨어 ( next 반드시 추가 )
   const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
