@@ -1,12 +1,12 @@
 const express = require('express');
-const {Post, User} = require('../models');
+const {Post, User, Hashtag} = require('../models');
 const router = express.Router();
 
 router.use((req, res, next) => {   // 전체 실행
   res.locals.user = req.user;
-  res.locals.followerCount = 0;
-  res.locals.followingCount = 0;
-  res.locals.followerIdList = [];
+  res.locals.followerCount = req.user ? req.user.Followers.length : 0;  // req.user가 있다는 건 로그인 했다는 것
+  res.locals.followingCount = req.user ? req.user.Followings.length : 0;  //req.user는 passprt/index의 deserialize에서 생성!!중요
+  res.locals.followerIdList = req.user ? req.user.Followings.map(f => f.id) : [];
   next();
 });
 
@@ -35,6 +35,31 @@ router.get('/', async(req, res, next) => {   //들어가자마자 메인 게시�
   } catch (err) {
     console.error(err);
     next(err);
+  }
+});
+
+
+// GET /hashtag?hashtag=노드
+router.get('/hashtag', async (req, res, next) => {
+  const query = decodeURIComponent(req.query.hashtag); // 프론트에서 encode로 설정  서버에서는 decode로 받는다.
+  if (!query) {
+    return res.redirect('/');
+  }
+  try {
+    const hashtag = await Hashtag.findOne({ where: { title: query } });
+    let posts = [];
+    if (hashtag) {
+      //belogstomany 이기 때문에 가져올때 getPosts 복수형
+      posts = await hashtag.getPosts({ include: [{ model: User, attributes: ['id', 'nick'] }] }); //attributes: ['id', 'nick'] 필요한 애들만 보내는게 좋다 보안상 
+    }
+
+    return res.render('main', {
+      title: `#${query} 검색결과 | davidSNS`,
+      twits: posts,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(error);
   }
 });
 

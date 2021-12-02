@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const { Post, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
+const { Hash } = require('crypto');
 
 const router = express.Router();
 
@@ -48,12 +49,33 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {  //이�
       img: req.body.url,
       UserId: req.user.id,
     });
+    const hashtags = req.body.content.match(/#[^\s#]*/g);  //해쉬태그 걸러내기 정규표현식 공부!!!
+
+    // [#노드, #익스프레스]
+    // [노드, 익스프레스]
+    // [ findOrCreate(노드), findOrCreate(익스프레스)] , 저장되어있으면 조회, 아니면 생성 = findOrCreate
+    // findOrCreate promise 라서 Promise.all로 한번에 처리
+    //
+    if(hashtags){
+      const result = await Promise.all(
+        hashtags.map(tag => {
+          return Hashtag.findOrCreate({
+            where: { title: tag.slice(1).toLowerCase() },
+          })
+        }),
+        // Hashtag.upsert() 업데이트 인서트 합친 개념 공식문서 확인
+      );
+      console.log(result);
+      await post.addHashtags(result.map(r => r[0]));
+      // addHashtags([해쉬태그, 해쉬태그]) 배열안에는 아이디만 넣는게 아니라 크리에이트 결과물인 객체를 넣어줘도 시퀄라이즈가 아이디인지 객체인지 판단 후 추가.! 
+    }
     res.redirect('/');
   } catch (error) {
     console.error(error);
     next(error);
   }
 });
-
-
+ 
 module.exports = router;
+
+// find, update, create, distroy 알면 기본적으로 디비 다 할 수 있을듯>?

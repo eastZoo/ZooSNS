@@ -11,6 +11,7 @@ dotenv.config();   //dotenv는 최대한 위로 올려주세요
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
 const postRouter = require('./routes/post');
+const userRouter = require('./routes/user');
 const { sequelize } = require('./models');
 const passportConfig= require('./passport');
 
@@ -53,6 +54,7 @@ app.use(passport.session());  // 로그인되어 있으면 브라우저가 세�
 app.use('/', pageRouter);
 app.use('/auth', authRouter);
 app.use('/post', postRouter);
+app.use('/user', userRouter);
 
 app.use((req, res, next) => {   // 53-56 라우터에서 처리가 되지않으면 404에러가 나고 404에러 처리 미들웨어 ( next 반드시 추가 )
   const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
