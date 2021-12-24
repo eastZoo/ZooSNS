@@ -9,15 +9,24 @@
     <script type="text/babel">
         const root = document.getElementById("root");
         function App(){
-            const [counter, setCounter] = React.useState(0);
-            const onClick = () => {
-                // setCounter(counter+1);
-                serCounter(current => current + 1); //more safe 현재스테이트를 바탕으로 다음스테이트를 계산할때
+            const [minutes, setMinutes] = React.useState(0);
+            const onChange = (event) =>{
+                setMinutes(event.target.value);
             };
             return (
             <div>
-                <h3>Total click: {counter}</h3>
-                <button onClick={onClick}>Click me</button>
+                <h1 className="hi">Super Converter</h1>
+                <label htmlFor="minutes">Minutes</label>
+                <input 
+                    value={minutes} //변경값을 보여주기 위해
+                    id="minutes" 
+                    placeholder="Minutes" 
+                    type="number" 
+                    onChange={onChange} //값을 변경하기 위한 이벤트를 위해 필요
+                />
+                <h4>you want to convert {minutes}</h4>
+                <label htmlFor="hours">Hours</label>
+                <input id="hours" placeholder="Hours" type="number"/>
             </div>
             );
         } 
